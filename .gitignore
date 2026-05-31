@@ -1,0 +1,18 @@
+# Results and training outputs
+results*/
+*.pt
+*.npy
+*.mp4
+*.png
+*.log
+
+# PDFs (assignment + paper)
+*.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
