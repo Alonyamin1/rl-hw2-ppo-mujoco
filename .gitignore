@@ -16,3 +16,7 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# Per-run working copies (duplicate source + ignored results)
+Hopper run */
+half cheetah run */

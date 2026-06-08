@@ -182,13 +182,11 @@ deliberate modifications were made:
 
 ## 10. Results
 
-*(To be filled after training)*
-
 ### Hopper-v4
 
 | Run | Final Reward (100 eps) |
 |-----|------------------------|
-| 1   | TBD                    |
+| 1   | 3537.68                |
 | 2   | TBD                    |
 | 3   | TBD                    |
 | **Average** | **TBD**       |
@@ -197,24 +195,53 @@ deliberate modifications were made:
 
 | Run | Final Reward (100 eps) |
 |-----|------------------------|
-| 1   | TBD                    |
-| 2   | TBD                    |
-| 3   | TBD                    |
-| **Average** | **TBD**       |
+| 1   | 3394.80                |
+| 2   | 1288.17                |
+| 3   | 1245.97                |
+| **Average** | **1976.31**       |
 
-*(Learning curve plots to be inserted here — one per run per environment)*
+**Learning curves**: See `learning_curve_run1.png`, `learning_curve_run2.png`, and `learning_curve_run3.png` in the results folder.
+
+**Observations (HalfCheetah)**:
+
+- **Run 1** learned aggressively — reward climbed steadily throughout training, reaching ~3400 by step 10M. The policy continued improving even past 5M steps, suggesting the 10M budget was well-used.
+- **Runs 2 and 3** showed similar weaker performance — reward rose quickly to ~1200–1400 by step 1M but then plateaued with no further systematic improvement for the remaining 9M steps. Final rewards were 1288 and 1246 respectively, and their curves are nearly identical in shape.
+- The large gap between run 1 (~3395) and runs 2–3 (~1250–1290) highlights the high seed sensitivity of HalfCheetah-v4 under PPO. Run 1 appears to have found a good running gait early and compounded it, while runs 2 and 3 converged to a mediocre local optimum. The mean across all three runs is **1976**, driven upward by run 1's outlier performance.
+
+### HalfCheetah-v4 — Run 4 (Ablation: Variance-Reduction Modifications)
+
+To investigate whether the seed variance is avoidable, we conducted a fourth run with three targeted changes:
+
+1. **8 parallel environments** (N=8): each PPO update sees transitions from 8 independent trajectories simultaneously, reducing the chance that a single unlucky initial rollout dominates the first gradient step.
+2. **Higher entropy coefficient (c₂ = 0.03, was 0.01)**: stronger exploration incentive during early training.
+3. **LR warm-up + annealing (was annealing only)**: LR ramps from 0 to 3×10⁻⁴ over the first 200k steps, then anneals to 0.
+
+| Run | Final Reward (100 eps) | Notes |
+|-----|------------------------|-------|
+| 1   | 3394.80                | Original parameters |
+| 2   | 1288.17                | Original parameters |
+| 3   | 1245.97                | Original parameters |
+| 4   | 856.57                 | 8 envs, c₂=0.03, LR warm-up |
+
+**Run 4 performed worse than all three original runs**, including the weakest (1246). The modifications backfired for the following reasons:
+
+- **Higher entropy** kept the policy stochastic throughout training. HalfCheetah has a dense reward signal that does not require extra exploration — the increased randomness degraded data quality for the full 10M steps rather than only early on.
+- **LR warm-up** delayed meaningful learning during the first 200k steps. Since the policy is random anyway at the start, using near-zero LR wastes transitions that the original schedule used productively.
+- **Combined effect**: the policy was slow to commit to any gait, and by the time the LR reached full strength the annealing schedule had already begun reducing it, leaving a narrow effective learning window.
+
+**Conclusion**: the original single-env parameters (`c₂=0.01`, linear annealing from step 0) are better suited to HalfCheetah. The inter-seed variance is a real property of the task under PPO, but the cost of these mitigations exceeded the cost of the variance itself. The original three runs stand as the reported results.
 
 ---
 
 ## 11. What Worked
 
-*(To be filled after training)*
+*(To be filled after all training runs complete)*
 
 ---
 
 ## 12. What Did Not Work
 
-*(To be filled after training)*
+*(To be filled after all training runs complete)*
 
 ---
 

@@ -70,7 +70,7 @@ class PPOAgent:
         for _ in range(n_epochs):
             for states, actions, old_log_probs, advantages, returns in buffer.get_minibatches(minibatch_size):
 
-                # ── Policy loss (clipped surrogate) ──────────────────────────
+                # Policy loss (clipped surrogate) 
                 new_log_probs = self.actor.get_log_prob(states, actions)
                 entropy       = self.actor.get_entropy(states).mean()
 
@@ -81,11 +81,11 @@ class PPOAgent:
                 surr2 = torch.clamp(ratio, 1.0 - self.clip_eps, 1.0 + self.clip_eps) * advantages
                 policy_loss = -torch.min(surr1, surr2).mean()
 
-                # ── Value loss ────────────────────────────────────────────────
+                # Value loss 
                 values     = self.critic(states)
                 value_loss = nn.functional.mse_loss(values, returns)
 
-                # ── Combined loss — equation (9) from the paper ───────────────
+                # Combined loss — equation (9)
                 # Minimize: -L_CLIP + c1*L_VF - c2*Entropy
                 loss = policy_loss + self.vf_coef * value_loss - self.entropy_coef * entropy
 
